@@ -51,7 +51,10 @@ fn compute_aggregate(ds: &Vec<String>) -> i32 {
     let mut sum = 0;
 
     for line in ds {
-        parse_dimension(line).map(|d| sum += required_paper(&d));
+        match parse_dimension(line) {
+            Ok(d) => sum += required_paper(&d),
+            Err(msg) => println!("error '{}' parsing {}", msg, line),
+        }
     }
 
     sum
