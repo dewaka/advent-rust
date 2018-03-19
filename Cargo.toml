@@ -1,0 +1,6 @@
+[workspace]
+members = [
+  "advent15",
+  "advent16",
+  "advent17"
+]

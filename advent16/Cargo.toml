@@ -1,0 +1,4 @@
+[package]
+name = "advent16"
+version = "0.1.0"
+workspace = ".."
