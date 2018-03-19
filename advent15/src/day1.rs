@@ -1,3 +1,5 @@
+// https://adventofcode.com/2015/day/1
+
 use std::io::{self, BufRead};
 
 fn compute_floor(s: &String) -> i32 {
@@ -18,7 +20,6 @@ fn print_answer(s: &String) {
 }
 
 pub fn problem() {
-    println!("This is day1");
     let stdin = io::stdin();
     for line in stdin.lock().lines() {
         print_answer(&line.unwrap());
