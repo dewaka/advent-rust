@@ -5,3 +5,5 @@ workspace = ".."
 
 [dependencies]
 md5 = "0.3.7"
+regex = "0.2"
+lazy_static = "1.0.0"
