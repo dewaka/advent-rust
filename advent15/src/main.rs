@@ -6,6 +6,7 @@ mod day3;
 mod day4;
 mod day5;
 mod day6;
+mod day7;
 
 use std::env;
 
@@ -31,6 +32,7 @@ pub fn main() {
         "4" => day4::problem(),
         "5" => day5::problem(),
         "6" => day6::problem(),
+        "7" => day7::problem(),
         _ => print_usage(&args[0]),
     }
 }
