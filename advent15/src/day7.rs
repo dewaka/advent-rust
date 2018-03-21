@@ -60,6 +60,8 @@ use self::regex::Regex;
 use std::collections::HashMap;
 use std::io::{self, BufRead};
 
+static debug: bool = false;
+
 type Wire = String;
 type Value = u16;
 
@@ -239,16 +241,44 @@ fn print_circuit(circuit: &Circuit) {
 }
 
 fn run_operations(circuit: &mut Circuit, ops: &mut Vec<Operation>) -> bool {
+    println!("There are {} operations to run", ops.len());
+
+    let mut count = 1;
     loop {
         let orig_size = ops.len();
 
         // retain only operations which weren't successful operations on the circuit
-        ops.retain(|op| !operate(circuit, &op));
+        ops.retain(|op| {
+            if operate(circuit, &op) {
+                println!("Reduced op: {:?}", op);
+                return false;
+            } else {
+                true
+            }
+        });
+
+        println!(
+            "Operation count - original: {}, now: {}",
+            orig_size,
+            ops.len()
+        );
 
         // if operations weren't reduced at all, then no point continuing anymore
         if orig_size == ops.len() {
             break;
         }
+
+        count += 1;
+    }
+
+    println!("Operations run in {} rounds", count);
+
+    if debug {
+        println!("** Operations ***");
+        for op in ops.iter() {
+            println!("{:?}", op);
+        }
+        println!("*****************");
     }
 
     ops.is_empty() // have we finished all possible operations?
@@ -296,12 +326,19 @@ fn parse_and(left: &String, right: &String, wire: &String) -> Option<Operation> 
                 wire: wire.clone(),
             },
         },
-        Err(_) => Operation::And {
-            left: Operand::OpWire { name: left.clone() },
-            right: Operand::OpWire {
-                name: right.clone(),
+        Err(_) => match right.parse::<u16>() {
+            Ok(rval) => Operation::And {
+                left: Operand::OpWire { name: left.clone() },
+                right: Operand::OpValue { value: rval },
+                wire: wire.clone(),
             },
-            wire: wire.clone(),
+            Err(_) => Operation::And {
+                left: Operand::OpWire { name: left.clone() },
+                right: Operand::OpWire {
+                    name: right.clone(),
+                },
+                wire: wire.clone(),
+            },
         },
     })
 }
@@ -322,12 +359,19 @@ fn parse_or(left: &String, right: &String, wire: &String) -> Option<Operation> {
                 wire: wire.clone(),
             },
         },
-        Err(_) => Operation::Or {
-            left: Operand::OpWire { name: left.clone() },
-            right: Operand::OpWire {
-                name: right.clone(),
+        Err(_) => match right.parse::<u16>() {
+            Ok(rval) => Operation::Or {
+                left: Operand::OpWire { name: left.clone() },
+                right: Operand::OpValue { value: rval },
+                wire: wire.clone(),
             },
-            wire: wire.clone(),
+            Err(_) => Operation::Or {
+                left: Operand::OpWire { name: left.clone() },
+                right: Operand::OpWire {
+                    name: right.clone(),
+                },
+                wire: wire.clone(),
+            },
         },
     })
 }
@@ -348,12 +392,19 @@ fn parse_lshift(left: &String, right: &String, wire: &String) -> Option<Operatio
                 wire: wire.clone(),
             },
         },
-        Err(_) => Operation::LShift {
-            left: Operand::OpWire { name: left.clone() },
-            right: Operand::OpWire {
-                name: right.clone(),
+        Err(_) => match right.parse::<u16>() {
+            Ok(rval) => Operation::LShift {
+                left: Operand::OpWire { name: left.clone() },
+                right: Operand::OpValue { value: rval },
+                wire: wire.clone(),
             },
-            wire: wire.clone(),
+            Err(_) => Operation::LShift {
+                left: Operand::OpWire { name: left.clone() },
+                right: Operand::OpWire {
+                    name: right.clone(),
+                },
+                wire: wire.clone(),
+            },
         },
     })
 }
@@ -374,12 +425,19 @@ fn parse_rshift(left: &String, right: &String, wire: &String) -> Option<Operatio
                 wire: wire.clone(),
             },
         },
-        Err(_) => Operation::RShift {
-            left: Operand::OpWire { name: left.clone() },
-            right: Operand::OpWire {
-                name: right.clone(),
+        Err(_) => match right.parse::<u16>() {
+            Ok(rval) => Operation::RShift {
+                left: Operand::OpWire { name: left.clone() },
+                right: Operand::OpValue { value: rval },
+                wire: wire.clone(),
             },
-            wire: wire.clone(),
+            Err(_) => Operation::RShift {
+                left: Operand::OpWire { name: left.clone() },
+                right: Operand::OpWire {
+                    name: right.clone(),
+                },
+                wire: wire.clone(),
+            },
         },
     })
 }
@@ -435,34 +493,6 @@ fn parse_operation(s: &String) -> Option<Operation> {
     None
 }
 
-fn test_circuit_operations() {
-    let mut circuit: Circuit = Circuit::new();
-    let mut ops = vec![
-        parse_operation(&"123 -> x".to_owned()).unwrap(),
-        parse_operation(&"456 -> y".to_owned()).unwrap(),
-        parse_operation(&"x AND y -> d".to_owned()).unwrap(),
-        parse_operation(&"x OR y -> e".to_owned()).unwrap(),
-        parse_operation(&"x LSHIFT 2 -> f".to_owned()).unwrap(),
-        parse_operation(&"y RSHIFT 2 -> g".to_owned()).unwrap(),
-        parse_operation(&"NOT x -> h".to_owned()).unwrap(),
-        parse_operation(&"NOT y -> i".to_owned()).unwrap(),
-    ];
-
-    println!("** Operations ***");
-    for op in &mut ops {
-        println!("{:?}", op);
-    }
-    println!("*****************");
-
-    if run_operations(&mut circuit, &mut ops) {
-        println!("OK");
-    } else {
-        println!("Not all done");
-    }
-
-    print_circuit(&circuit);
-}
-
 pub fn problem() {
     println!("2015, day 7");
 
@@ -479,11 +509,59 @@ pub fn problem() {
         }
     }
 
+    if debug {
+        println!("** Original Operations ***");
+        for op in &mut ops {
+            println!("{:?}", op);
+        }
+        println!("*****************");
+    }
+
     run_operations(&mut circuit, &mut ops);
+
     print_circuit(&circuit);
+
+    if circuit.contains_key("a") {
+        println!("Value of gate 'a' -> {}", circuit.get("a").unwrap());
+    }
 }
 
 #[test]
-fn test_examples() {
-    assert!(false);
+fn test_gates1() {
+    let mut circuit: Circuit = Circuit::new();
+    let mut ops = vec![
+        parse_operation(&"x LSHIFT 2 -> f".to_owned()).unwrap(),
+        parse_operation(&"x -> y".to_owned()).unwrap(),
+        parse_operation(&"1 -> x".to_owned()).unwrap(),
+    ];
+
+    assert!(run_operations(&mut circuit, &mut ops));
+    assert_eq!(*circuit.get("x").unwrap(), 1);
+    assert_eq!(*circuit.get("f").unwrap(), 4);
+    assert_eq!(*circuit.get("y").unwrap(), 1);
+}
+
+#[test]
+fn test_gates2() {
+    let mut circuit: Circuit = Circuit::new();
+    let mut ops = vec![
+        parse_operation(&"123 -> x".to_owned()).unwrap(),
+        parse_operation(&"456 -> y".to_owned()).unwrap(),
+        parse_operation(&"x AND y -> d".to_owned()).unwrap(),
+        parse_operation(&"x OR y -> e".to_owned()).unwrap(),
+        parse_operation(&"x LSHIFT 2 -> f".to_owned()).unwrap(),
+        parse_operation(&"y RSHIFT 2 -> g".to_owned()).unwrap(),
+        parse_operation(&"NOT x -> h".to_owned()).unwrap(),
+        parse_operation(&"NOT y -> i".to_owned()).unwrap(),
+    ];
+
+    assert!(run_operations(&mut circuit, &mut ops));
+    assert_eq!(*circuit.get("f").unwrap(), 492);
+    assert_eq!(*circuit.get("h").unwrap(), 65412);
+    assert_eq!(*circuit.get("x").unwrap(), 123);
+    assert_eq!(*circuit.get("d").unwrap(), 72);
+    assert_eq!(*circuit.get("i").unwrap(), 65079);
+    assert_eq!(*circuit.get("y").unwrap(), 456);
+    assert_eq!(*circuit.get("g").unwrap(), 114);
+    assert_eq!(*circuit.get("e").unwrap(), 507);
 }
