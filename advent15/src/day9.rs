@@ -28,11 +28,13 @@ The shortest of these is London -> Dublin -> Belfast = 605, and so the answer is
 What is the distance of the shortest route?
 */
 
+extern crate permutohedron;
 extern crate regex;
 
 use std::io::{self, BufRead};
 use std::collections::HashMap;
 use self::regex::Regex;
+use self::permutohedron::heap_recursive;
 
 type Distance = i32;
 type CityPair = (String, String);
@@ -76,20 +78,61 @@ fn update_distance_map(map: &mut DistanceMap, s: &String) -> bool {
     }
 }
 
-fn test_permutations() {
-    let v = vec![1, 2, 3, 4];
-    for (i, el1) in v.iter().enumerate() {
-        for el2 in v.slice_from(i + 1).iter() {
-            println!("{}, {}", el1, el2);
+// Get a vector of unique cities from the distance map
+fn get_cities(map: &DistanceMap) -> Vec<String> {
+    let mut cities: HashMap<String, String> = HashMap::new();
+    let mut cv: Vec<String> = vec![];
+
+    for (&(ref c1, ref c2), _) in map.iter() {
+        cities.insert(c1.to_owned(), c1.to_owned());
+        cities.insert(c2.to_owned(), c2.to_owned());
+    }
+
+    for city in cities.keys() {
+        cv.push(city.to_owned());
+    }
+    cv
+}
+
+fn calculate_shortest(map: &DistanceMap, cities: &Vec<String>) -> (Distance, Distance) {
+    let mut shortest: Option<Distance> = None;
+    let mut longest: Option<Distance> = None;
+
+    let mut mcities: Vec<String> = cities.clone();
+    let mut city_permutations = Vec::new();
+
+    heap_recursive(&mut mcities, |city_perm| {
+        city_permutations.push(city_perm.to_vec())
+    });
+
+    for city_perm in city_permutations {
+        let mut sum_distance = 0;
+        for city_pair in city_perm.iter().zip(city_perm[1..].iter()) {
+            let (c1, c2) = city_pair;
+            sum_distance += map.get(&(c1.to_owned(), c2.to_owned())).unwrap_or(&0);
+        }
+
+        if shortest == None {
+            shortest = Some(sum_distance);
+        } else if sum_distance < shortest.unwrap() {
+            shortest = Some(sum_distance);
+        }
+
+        if longest == None {
+            longest = Some(sum_distance);
+        } else if sum_distance > longest.unwrap() {
+            longest = Some(sum_distance);
         }
     }
+
+    (shortest.unwrap_or(-1), longest.unwrap_or(-1))
 }
 
 pub fn problem() {
     println!("2015, day 9");
 
-    test_permutations();
-    return;
+    // test_permutations();
+    // return;
 
     let mut distance_map = DistanceMap::new();
 
@@ -102,9 +145,9 @@ pub fn problem() {
         }
     }
 
-    for (k, v) in distance_map.iter() {
-        println!("{:?} -> {}", k, v);
-    }
+    let cities = get_cities(&distance_map);
+    let (shortest, longest) = calculate_shortest(&distance_map, &cities);
+    println!("Shortest: {}, Longest: {}", shortest, longest);
 }
 
 #[test]
@@ -134,5 +177,44 @@ fn test_parse_distance_spec() {
             assert_eq!(141, d);
         }
         None => assert!(false),
+    }
+}
+
+// Playground method to test slices, zippers and permutations in Rust
+fn test_permutations() {
+    let mut data = vec![1, 2, 3, 4];
+    let mut perms = Vec::new();
+
+    heap_recursive(&mut data, |pm| perms.push(pm.to_vec()));
+
+    println!("** Permutations ***");
+    for pm in perms {
+        println!("{:?}", pm);
+    }
+
+    fn use_slices() {
+        let a = vec![1, 2, 3, 4, 5];
+
+        // All elements
+        println!("a[..] -> {:?}", &a[..]);
+
+        // Rest
+        println!("a[1..] -> {:?}", &a[1..]);
+
+        // With a start and an end
+        println!("a[1..4] -> {:?}", &a[1..4]);
+
+        // With just a start
+        println!("a[2..] -> {:?}", &a[2..]);
+
+        // With just an end
+        println!("a[..3] -> {:?}", &a[..3]);
+    }
+
+    use_slices();
+
+    let test_data = vec![1, 2, 3, 4, 5, 6, 7];
+    for p in test_data.iter().zip(test_data[1..].iter()) {
+        println!("{:?}", p);
     }
 }
