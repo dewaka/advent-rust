@@ -39,7 +39,7 @@ Your puzzle input is hepxcrrq.
 */
 use std::io::{self, BufRead};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Password {
     pass: Vec<u8>,
 }
@@ -62,7 +62,7 @@ impl Password {
         let mut data: Vec<u8> = vec![];
 
         for c in s.as_bytes() {
-            if Password::is_valid_pass_char(*c) {
+            if 'a' as u8 <= *c || *c <= 'z' as u8 {
                 data.push(*c);
             } else {
                 return None;
@@ -108,26 +108,18 @@ impl Password {
 
     fn count_non_overlapping_pairs(&self) -> i32 {
         let mut i = 0;
-        while i < self.pass.len() - 3 {
-            // Check if we can find three consecutive letters
-            let mut c = self.pass[i];
-            let mut found = true;
-            for n in 1..3 {
-                if c + 1 != self.pass[i + n] {
-                    found = false;
-                    break;
-                }
-                c = self.pass[i + n];
-            }
+        let mut pairs = 0;
 
-            if found {
-                unimplemented!();
+        while i < self.pass.len() - 1 {
+            if self.pass[i] == self.pass[i + 1] {
+                pairs += 1;
+                i += 2;
+            } else {
+                i += 1;
             }
-
-            i += 1;
         }
 
-        unimplemented!();
+        pairs
     }
 
     fn has_required_pairs(&self) -> bool {
@@ -143,6 +135,54 @@ impl Password {
     }
 }
 
+impl Iterator for Password {
+    type Item = Password;
+
+    fn next(&mut self) -> Option<Password> {
+        let mut n: i32 = self.pass.len() as i32 - 1;
+        let mut next_pass = self.pass.clone();
+
+        while n >= 0 {
+            next_pass[n as usize] = next_pass[n as usize] + 1;
+            if next_pass[n as usize] > 'z' as u8 {
+                next_pass[n as usize] = 'a' as u8;
+            } else {
+                break;
+            }
+            n -= 1;
+        }
+
+        let current = Password {
+            pass: self.pass.clone(),
+        };
+        self.pass = next_pass;
+
+        Some(current)
+    }
+}
+
+fn next_valid(p: &Password) -> Option<Password> {
+    let mut count = 0;
+    if p.is_valid() {
+        count = 1;
+    }
+
+    let ps = Password {
+        pass: p.pass.clone(),
+    };
+
+    for p2 in ps {
+        if p2.is_valid() {
+            if count <= 0 {
+                return Some(p2);
+            }
+            count -= 1;
+        }
+    }
+
+    None
+}
+
 fn test_pass() {
     let p = Password::from_str(&"xyz".to_owned()).unwrap();
     println!("{}", p.to_string());
@@ -152,17 +192,28 @@ fn test_pass() {
     } else {
         println!("{} is invalid", p.to_string());
     }
+
+    let mut count = 0;
+    for p_next in Password::from_str(&"ghijklmn".to_owned()).unwrap() {
+        if p_next.is_valid() {
+            println!("{}: {:?} - VALID", count, p_next.to_string());
+            break;
+        }
+        count += 1;
+    }
 }
 
 pub fn problem() {
-    test_pass();
-    return;
-
     let stdin = io::stdin();
     for line in stdin.lock().lines() {
         let sline = line.unwrap();
 
-        println!("{}", sline);
+        match Password::from_str(&sline) {
+            Some(p) => {
+                println!("{} -> {}", sline, next_valid(&p).unwrap().to_string());
+            },
+            None => { println!("Invalid password: {}", sline); }
+        }
     }
 }
 
@@ -170,4 +221,14 @@ pub fn problem() {
 fn test_valid_passwords() {
     let p1 = Password::from_str(&"hijklmmn".to_owned()).unwrap();
     assert!(!p1.is_valid());
+
+    let p2 = Password::from_str(&"ghjaabcc".to_owned()).unwrap();
+    assert!(p2.is_valid());
+}
+
+#[test]
+fn test_example() {
+    let expected = Password::from_str(&"ghjaabcc".to_owned());
+    let next = next_valid(&Password::from_str(&"ghijklmn".to_owned()).unwrap());
+    assert_eq!(expected, next);
 }
