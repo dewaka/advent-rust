@@ -23,7 +23,7 @@ What is the sum of all numbers in the document?
 */
 extern crate serde_json;
 
-use self::serde_json::{Error, Value};
+use self::serde_json::Value;
 use std::io::{self, BufRead};
 
 fn sum_numbers(v: Value) -> i64 {
