@@ -90,6 +90,7 @@ fn parse_series(s: &String) -> Option<LookAndSaySeries> {
     Some(series.clone())
 }
 
+#[allow(dead_code)]
 fn test_look_and_say() {
     match parse_series(&"1".to_owned()) {
         Some(s) => {

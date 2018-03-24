@@ -46,6 +46,7 @@ fn count_difference(s: &String) -> i32 {
     bs.len() as i32 - count_in_memory(&bs) as i32
 }
 
+#[allow(dead_code)]
 fn count_in_memory_str(s: &String) -> usize {
     count_in_memory(&s.to_owned().into_bytes())
 }
@@ -76,6 +77,7 @@ fn count_in_memory(s: &Vec<u8>) -> usize {
     count
 }
 
+#[allow(dead_code)]
 fn test1() {
     fn print_len(s: &String) {
         let n = count_in_memory(&s.to_owned().into_bytes());

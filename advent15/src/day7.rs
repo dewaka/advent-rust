@@ -60,7 +60,7 @@ use self::regex::Regex;
 use std::collections::HashMap;
 use std::io::{self, BufRead};
 
-static debug: bool = false;
+static DEBUG: bool = false;
 
 type Wire = String;
 type Value = u16;
@@ -273,7 +273,7 @@ fn run_operations(circuit: &mut Circuit, ops: &mut Vec<Operation>) -> bool {
 
     println!("Operations run in {} rounds", count);
 
-    if debug {
+    if DEBUG {
         println!("** Operations ***");
         for op in ops.iter() {
             println!("{:?}", op);
@@ -509,7 +509,7 @@ pub fn problem() {
         }
     }
 
-    if debug {
+    if DEBUG {
         println!("** Original Operations ***");
         for op in &mut ops {
             println!("{:?}", op);

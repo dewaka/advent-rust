@@ -183,6 +183,7 @@ fn next_valid(p: &Password) -> Option<Password> {
     None
 }
 
+#[allow(dead_code)]
 fn test_pass() {
     let p = Password::from_str(&"xyz".to_owned()).unwrap();
     println!("{}", p.to_string());

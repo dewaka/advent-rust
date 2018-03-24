@@ -40,6 +40,7 @@ type Distance = i32;
 type CityPair = (String, String);
 type DistanceMap = HashMap<CityPair, Distance>;
 
+#[allow(dead_code)]
 fn distance(map: &DistanceMap, from: &String, to: &String) -> Option<Distance> {
     match map.get(&(from.to_owned(), to.to_owned())) {
         Some(d) => Some(*d),
@@ -180,6 +181,7 @@ fn test_parse_distance_spec() {
     }
 }
 
+#[allow(dead_code)]
 // Playground method to test slices, zippers and permutations in Rust
 fn test_permutations() {
     let mut data = vec![1, 2, 3, 4];
