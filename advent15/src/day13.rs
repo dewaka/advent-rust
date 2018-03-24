@@ -67,6 +67,7 @@ fn add_to_happiness_map(map: &mut HappinessMap, info: &HappinessInfo) {
     map.insert(pair.to_owned(), *val);
 }
 
+#[allow(dead_code)]
 fn print_map(map: &HappinessMap) {
     for (&(ref a, ref b), v) in map {
         if *v > 0 {

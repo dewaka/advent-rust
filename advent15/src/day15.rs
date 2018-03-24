@@ -67,13 +67,6 @@ fn parse_ingredient(s: &str) -> Option<Ingredient> {
 
     if R_ING.is_match(s) {
         for cap in R_ING.captures_iter(s) {
-            let name = cap[1].to_owned();
-            let capa = cap[2].to_owned();
-            let dur = cap[3].to_owned();
-            let fla = cap[4].to_owned();
-            let tex = cap[5].to_owned();
-            let cal = cap[6].to_owned();
-
             if let Ok(capacity) = cap[2].to_owned().parse::<i32>() {
                 if let Ok(durability) = cap[3].to_owned().parse::<i32>() {
                     if let Ok(flavor) = cap[4].to_owned().parse::<i32>() {
@@ -160,13 +153,6 @@ fn ration(num: i32, slots: i32) -> Vec<Vec<i32>> {
 
         return rs;
     }
-}
-
-fn test_rations() {
-    let mut rs = ration(10, 2);
-    println!("Rations (2): {:?}", rs);
-    rs = ration(10, 3);
-    println!("Rations (3): {:?}", rs);
 }
 
 fn calculate_optimal(ingredients: &Vec<Ingredient>, amount: i32) -> Option<(i32, Vec<i32>)> {
