@@ -1,4 +1,5 @@
 #[macro_use] extern crate lazy_static;
+#[macro_use] extern crate ndarray;
 
 mod day1;
 mod day2;
@@ -17,6 +18,7 @@ mod day14;
 mod day15;
 mod day16;
 mod day17;
+mod day18;
 
 use std::env;
 
@@ -53,6 +55,7 @@ pub fn main() {
         "15" => day15::problem(),
         "16" => day16::problem(),
         "17" => day17::problem(),
+        "18" => day18::problem(),
         _ => print_usage(&args[0]),
     }
 }
