@@ -112,6 +112,7 @@ impl Board {
         }
     }
 
+    #[allow(dead_code)]
     pub fn turn_on_corners(&mut self) {
         let n = self.lights.rows();
         let m = self.lights.cols();
@@ -206,11 +207,6 @@ pub fn problem() {
     }
 
     compute_board_state(100, &init_board, 100);
-}
-
-#[test]
-fn test_day18() {
-    assert_eq!(4, 4);
 }
 
 #[test]
