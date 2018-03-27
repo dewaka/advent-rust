@@ -126,27 +126,6 @@ fn unique_replacements(hay: &str, rep_vec: &Vec<(String, String)>) -> Vec<String
     repls
 }
 
-fn test_replace() {
-    let s = "this is old one for old times";
-    let ns = s.replace("old", "new");
-    println!("{} -> {}", s, ns);
-
-    for (s, p) in s.match_indices("old") {
-        println!("{}, {}", s, p);
-    }
-
-    for (s, p) in "kababa".match_indices("aba") {
-        println!("{}, {}", s, p);
-    }
-
-    let reps = vec![
-        ("H".to_owned(), "HO".to_owned()),
-        ("H".to_owned(), "OH".to_owned()),
-        ("O".to_owned(), "HH".to_owned()),
-    ];
-    println!("Reps: {:?}", unique_replacements("HOH", &reps));
-}
-
 // By default we expect a string replacement rule. If it does not look like a
 // string replacement rule, then we take the given string as simply an input
 // string to be run the rules on
@@ -229,4 +208,16 @@ fn test_split_matches() {
     test("", "aba", 0);
     test("aba", "", 1);
     test("", "", 1);
+}
+
+#[test]
+fn test_unique_replacements() {
+    let reps = vec![
+        ("H".to_owned(), "HO".to_owned()),
+        ("H".to_owned(), "OH".to_owned()),
+        ("O".to_owned(), "HH".to_owned()),
+    ];
+
+    let ureps = unique_replacements("HOH", &reps);
+    assert_eq!(4, ureps.len());
 }
