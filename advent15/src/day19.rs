@@ -196,6 +196,9 @@ fn test_split_matches() {
 
         assert_eq!(matches.len(), expected_count);
 
+        // We can test that given splits recombined with the needle should be
+        // always equal to the hay: prefix + needle + suffix == hay, where
+        // (prefix, suffix) are individual split pairs
         for (f, b) in matches {
             let mut computed: String = f;
             computed.push_str(n);
