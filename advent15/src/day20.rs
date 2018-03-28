@@ -93,11 +93,6 @@ pub fn problem() {
 }
 
 #[test]
-fn test() {
-    assert_eq!(4, 4);
-}
-
-#[test]
 fn test_given_elves_delivery() {
     assert_eq!(10, presents_to_house(1));
     assert_eq!(30, presents_to_house(2));
