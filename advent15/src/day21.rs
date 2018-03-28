@@ -169,9 +169,9 @@ impl Game {
 
         // Rule is we can only buy one armor or none
         let mut cmb: Vec<Vec<Item>> = vec![];
-        cmb.push(vec![]); // No armor case
+        cmb.push(vec![]); // No armor combination
         for a in armors {
-            cmb.push(vec![a.clone()]); // each individual combination
+            cmb.push(vec![a.clone()]); // single armor combination
         }
 
         cmb
@@ -186,7 +186,7 @@ impl Game {
         // Rule is we can only buy one armor or none
         let mut cmb: Vec<Vec<Item>> = vec![];
         for w in weapons {
-            cmb.push(vec![w.clone()]); // each individual combination
+            cmb.push(vec![w.clone()]); // single weapon combination
         }
 
         cmb
@@ -200,11 +200,12 @@ impl Game {
 
         // Rule is we can buy zero, one or two armors
         let mut cmb: Vec<Vec<Item>> = vec![];
-        cmb.push(vec![]); // zero case
+        cmb.push(vec![]); // zero ring combination
         for i in 0..rings.len() {
-            cmb.push(vec![rings[i].clone()]);
+            cmb.push(vec![rings[i].clone()]); // single ring combinations
+
             for j in i + 1..rings.len() {
-                cmb.push(vec![rings[i].clone(), rings[j].clone()]);
+                cmb.push(vec![rings[i].clone(), rings[j].clone()]); // two rings combinations
             }
         }
 
@@ -346,12 +347,12 @@ fn best_items_to_buy(boss: Player) {
     }
 }
 
-fn parse_hit_points(s: &String) -> Result<i32, ParseIntError> {
+pub fn parse_hit_points(s: &String) -> Result<i32, ParseIntError> {
     let hs: String = s.chars().skip("Hit Points: ".len()).collect();
     hs.parse::<i32>()
 }
 
-fn parse_damage(s: &String) -> Result<i32, ParseIntError> {
+pub fn parse_damage(s: &String) -> Result<i32, ParseIntError> {
     let hs: String = s.chars().skip("Damage: ".len()).collect();
     hs.parse::<i32>()
 }
@@ -442,4 +443,22 @@ fn test_example_winner() {
     // Test player wins methods
     assert!(game.player1_wins());
     assert!(!game.player2_wins());
+}
+
+#[test]
+fn test_parse_hit_points() {
+    let pr = parse_hit_points(&"Hit Points: 34".to_owned());
+    assert_eq!(pr, Ok(34));
+}
+
+#[test]
+fn test_parse_damage() {
+    let pr = parse_damage(&"Damage: 48".to_owned());
+    assert_eq!(pr, Ok(48));
+}
+
+#[test]
+fn test_parse_armor() {
+    let pr = parse_armor(&"Armor: 48".to_owned());
+    assert_eq!(pr, Ok(48));
 }
