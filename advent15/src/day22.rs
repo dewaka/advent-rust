@@ -136,24 +136,66 @@ You start with 50 hit points and 500 mana points. The boss's actual stats are in
 your puzzle input. What is the least amount of mana you can spend and still win
 the fight? (Do not include mana recharge effects as "spending" negative mana.)
 */
+extern crate log;
+extern crate env_logger;
+
 use std::io::{self, BufRead};
 use day21::{parse_damage, parse_hit_points};
-
-#[derive(Debug, Clone, PartialEq)]
-struct Spell {
-    cost: i32,
-    damage: (i32, i32),
-    healing: (i32, i32),
-    armor: (i32, i32),
-    mana: (i32, i32),
-}
 
 #[derive(Debug, Clone, PartialEq)]
 struct Player {
     name: String,
     hit_points: i32,
+    armor: i32,
     damage: i32,
     mana: i32,
+}
+
+impl Player {
+    pub fn lost(&self) -> bool {
+        self.hit_points <= 0
+    }
+
+    pub fn incur_damage(&mut self, attack: i32) {
+        let d = attack - self.armor;
+        if d < 1 {
+            debug!("incurring damage of 1 to {}", self.name);
+            self.hit_points -= 1; // at least 1 point damage always
+        } else {
+            debug!("incurring damage of {} to {}", d, self.name);
+            self.hit_points -= d;
+        }
+    }
+
+    pub fn apply_healing(&mut self, healing: i32) {
+        debug!("applying healing of {} to {}", healing, self.name);
+        self.hit_points += healing;
+    }
+
+    pub fn apply_armor(&mut self, armor: i32) {
+        debug!("adding {} armor to {}", armor, self.name);
+        self.armor += armor;
+    }
+
+    pub fn add_mana(&mut self, mana: i32) {
+        debug!("adding {} mana to {}", mana, self.name);
+        self.mana += mana;
+    }
+
+    // This is a simple attack of the type boss would do
+    pub fn attack(&self, p: &mut Player) {
+        p.incur_damage(self.damage);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+struct Spell {
+    name: String,
+    cost: i32,
+    damage: (i32, i32),
+    healing: (i32, i32),
+    armor: (i32, i32),
+    mana: (i32, i32),
 }
 
 trait CastSpell {
@@ -220,8 +262,11 @@ impl CastSpell for Spell {
 
     fn cast(&mut self, player: &mut Player, opponent: &mut Player) -> bool {
         if !self.active() {
+            debug!("spell {} is not active", self.name);
             return false;
         }
+
+        debug!("spell {} is active", self.name);
 
         if self.can_damage() {
             opponent.incur_damage(self.use_damage());
@@ -249,37 +294,48 @@ struct Game {
     player2: Player,
 }
 
-const DEBUG: bool = true;
-
-impl Player {
-    pub fn lost(&self) -> bool {
-        self.hit_points <= 0
-    }
-
-    pub fn incur_damage(&mut self, damage: i32) {
-        unimplemented!();
-    }
-
-    pub fn apply_healing(&mut self, damage: i32) {
-        unimplemented!();
-    }
-
-    pub fn apply_armor(&mut self, damage: i32) {
-        unimplemented!();
-    }
-
-    pub fn add_mana(&mut self, damage: i32) {
-        unimplemented!();
-    }
-}
-
 impl Game {
-    // pub fn play(&self, spells: Vec<Spell>) -> String {
-    //     format!("")
-    // }
+    pub fn play(&self, spells: Vec<Spell>) -> String {
+        debug!("start of play player1: {:?}", self.player1);
+        debug!("start of play player2: {:?}", self.player2);
+        debug!("start spells: {:?}", spells);
+
+        let mut active_spells: Vec<Spell> = vec![];
+        let mut p1 = self.player1.clone();
+        let mut p2 = self.player2.clone();
+
+        if p2.lost() {
+            return p1.name;
+        }
+        if p1.lost() {
+            return p2.name;
+        }
+
+        loop {
+            // How to add to active spells?
+
+            // Cast all active spells
+            for s in &mut active_spells {
+                s.cast(&mut p1, &mut p2);
+            }
+
+            // Do p1 attacking
+            if p2.lost() {
+                return p1.name;
+            }
+
+            p2.attack(&mut p1);
+            // Do p2 attacking
+            if p1.lost() {
+                return p2.name;
+            }
+        }
+    }
 }
 
 pub fn problem() {
+    env_logger::init();
+
     let mut hit_points: Option<i32> = None;
     let mut damage: Option<i32> = None;
 
