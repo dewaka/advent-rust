@@ -45,10 +45,12 @@ desk. What is the bathroom code?
 */
 use std::io::{self, BufRead};
 
+const BOARD_SIZE: i32 = 3;
+
 type Pos = (i32, i32);
 
 fn move_pos(p: Pos, d: char) -> Pos {
-    let bounded = |x, y| if 0 <= x && x <= 2 { x } else { y };
+    let bounded = |x, y| if 0 <= x && x < BOARD_SIZE { x } else { y };
 
     let (x, y) = p;
     match d {
@@ -63,7 +65,7 @@ fn move_pos(p: Pos, d: char) -> Pos {
 // We map top most left pos (0, 0) to 1, and bottom most right (2, 2) -> 9
 fn pos_to_digit(p: Pos) -> i32 {
     let (x, y) = p;
-    (x + 1) + 3 * y
+    (x + 1) + BOARD_SIZE * y
 }
 
 fn process_instr(mut p: Pos, instr: &str) -> (Pos, i32) {
@@ -73,6 +75,7 @@ fn process_instr(mut p: Pos, instr: &str) -> (Pos, i32) {
     (p, pos_to_digit(p))
 }
 
+#[allow(dead_code)]
 fn process_code(mut p: Pos, instrs: &[&str]) -> String {
     let mut code: String = String::new();
 
@@ -84,7 +87,6 @@ fn process_code(mut p: Pos, instrs: &[&str]) -> String {
 
     code
 }
-
 
 pub fn problem() {
     let mut pos: Pos = (1, 1); // we start at 5th digit

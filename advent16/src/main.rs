@@ -1,5 +1,6 @@
 mod day1;
 mod day2;
+mod day3;
 
 use std::env;
 
@@ -21,6 +22,7 @@ pub fn main() {
     match day.as_ref() {
         "1" => day1::problem(),
         "2" => day2::problem(),
+        "3" => day3::problem(),
         _ => print_usage(&args[0]),
     }
 }
