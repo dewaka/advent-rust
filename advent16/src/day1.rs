@@ -85,12 +85,12 @@ fn update_pos(mut pos: Pos, side: Side) -> Pos {
         },
         Direction::South => match side {
             Side::R(n) => {
-                pos.direction = Direction::East;
+                pos.direction = Direction::West;
                 pos.x -= n;
                 pos
             }
             Side::L(n) => {
-                pos.direction = Direction::West;
+                pos.direction = Direction::East;
                 pos.x += n;
                 pos
             }
@@ -117,19 +117,17 @@ fn update_positions(pos: Pos, sides: &[Side]) -> Pos {
 fn parse_side(s: &str) -> Option<Side> {
     if s.starts_with("R") {
         let num_part: String = s.chars().skip(1).collect();
-        match num_part.parse::<i32>() {
-            Ok(num) => Some(Side::R(num)),
-            Err(_) => None,
+        if let Ok(num) = num_part.parse::<i32>() {
+            return Some(Side::R(num));
         }
     } else if s.starts_with("L") {
         let num_part: String = s.chars().skip(1).collect();
-        match num_part.parse::<i32>() {
-            Ok(num) => Some(Side::L(num)),
-            Err(_) => None,
+        if let Ok(num) = num_part.parse::<i32>() {
+            return Some(Side::L(num));
         }
-    } else {
-        None
     }
+
+    None
 }
 
 fn parse_sides(s: &str, sides: &mut Vec<Side>) {
@@ -149,6 +147,8 @@ pub fn problem() {
 
         parse_sides(&sline, &mut sides);
     }
+
+    println!("There {} sides", sides.len());
 
     let mut pos = START_POS;
     pos = update_positions(pos, &sides);
@@ -184,5 +184,12 @@ fn test_examples() {
         let mut pos = START_POS;
         pos = update_positions(pos, &vec![Side::R(5), Side::L(5), Side::R(5), Side::R(3)]);
         assert_eq!(12, distance(&pos));
+    }
+
+    {
+        let mut pos = START_POS;
+        pos = update_positions(pos, &vec![Side::R(5), Side::R(5), Side::R(5), Side::R(5)]);
+        println!("Pos: {:?}", pos);
+        assert_eq!(0, distance(&pos));
     }
 }
